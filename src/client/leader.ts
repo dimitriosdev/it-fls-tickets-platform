@@ -14,7 +14,7 @@ const leadReport = {
   supporterDetail: "",
 };
 
-const leadT = (de, en) => (lang === "en" ? en : de);
+const leadT = (de, en = de) => (lang === "en" ? en : de);
 const leadTime = (d) => new Date(d).getTime();
 const leadKey = (d) => {
   const x = new Date(d);
@@ -52,7 +52,7 @@ function leadSpan(a, b) {
 function leadValid(list) {
   return list.filter((x) => x != null);
 }
-function leadEventTime(i, pattern, last) {
+function leadEventTime(i, pattern, last = false) {
   const hits = (i.events || []).filter((e) => pattern.test(e[0]));
   const e = last ? hits[hits.length - 1] : hits[0];
   return e ? e[2] : null;
@@ -85,18 +85,18 @@ function leadRangeDays(from, to) {
     out.push(k);
   return out;
 }
-function leadCountBy(list, keyFn) {
-  const m = {};
+function leadCountBy(list, keyFn): Record<string, number> {
+  const m: Record<string, number> = {};
   list.forEach((i) => {
     const k = keyFn(i);
     m[k] = (m[k] || 0) + 1;
   });
   return m;
 }
-function leadBar(pct, cls) {
+function leadBar(pct, cls = "") {
   return `<div class="hbar"><i class="${cls || ""}" style="width:${Math.max(0, Math.min(100, pct))}%"></i></div>`;
 }
-function leadRow(i, extra) {
+function leadRow(i, extra = "") {
   return `<tr class="incident-row" tabindex="0" role="link" onclick="openIncident('${i.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openIncident('${i.id}')}"><td class="id">${escapeHtml(i.id)}</td>${extra}</tr>`;
 }
 
@@ -134,9 +134,9 @@ function leadDashboard() {
     leadValid(resolvedToday.map((i) => leadSpan(i.date, i.resolvedAt))),
   );
 
-  const kpi = (label, value, note, click, tone) =>
+  const kpi = (label, value, note = "", click = "", tone = "") =>
     `<${click ? "button" : "div"} class="card kpi ${click ? "clickablemetric" : ""} ${tone || ""}" ${click ? `onclick="${click}"` : ""}><span class="kpi-label">${label}</span><span class="kpi-value">${value}</span><span class="kpi-note">${note}</span></${click ? "button" : "div"}>`;
-  const small = (label, value, tone) =>
+  const small = (label, value, tone = "") =>
     `<div class="card kpi-small ${value > 0 && tone ? tone : ""}"><strong>${value}</strong><span>${label}</span></div>`;
 
   const kpis = `<div class="kpi-grid">${kpi(leadT("Offene Ereignisse", "Open incidents"), open.length, leadT("Aktuell ungelöst", "Currently unresolved"), "incidentListMode='open';setPage('incidents')")}${kpi(leadT("Neu heute", "New today"), newToday.length, leadT("Heute gemeldet", "Reported today"))}${kpi(leadT("Heute gelöst", "Resolved today"), resolvedToday.length, leadT("Durch Support gelöst", "Resolved by support"))}${kpi(leadT("Wartet auf Schliessung", "Awaiting closure"), awaiting.length, leadT("Gelöst, nicht geschlossen", "Resolved, not closed"), "incidentListMode='resolved';setPage('incidents')")}</div>
@@ -298,7 +298,7 @@ function leadDataset() {
 function leadResolutionTimes(list) {
   return leadValid(list.map((i) => leadSpan(i.date, i.resolvedAt)));
 }
-function leadStat(label, value, hint) {
+function leadStat(label, value, hint = "") {
   return `<div class="reportstat"><strong>${value}</strong><span>${label}</span>${hint ? `<small class="sub">${hint}</small>` : ""}</div>`;
 }
 
@@ -433,7 +433,7 @@ function leadSupporters(d) {
 }
 
 function leadGroupRows(list, keyFn) {
-  const groups = {};
+  const groups: Record<string, any[]> = {};
   list.forEach((i) => {
     const k = keyFn(i);
     if (k != null) (groups[k] = groups[k] || []).push(i);
@@ -570,7 +570,7 @@ function leadResolution(d) {
 }
 
 function leadWorkplaces(d) {
-  const groups = {};
+  const groups: Record<string, any[]> = {};
   d.created.forEach((i) => (groups[i.workplace] = groups[i.workplace] || []).push(i));
   const openNow = leadCountBy(d.base.filter(leadIsOpen), (i) => i.workplace);
   const rows = Object.entries(groups)

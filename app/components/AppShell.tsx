@@ -1,8 +1,15 @@
 "use client";
 
+import type { ReactNode } from "react";
 import UserMenu from "./UserMenu";
 
-function Brand({ className, logoSrc, onClick }) {
+interface BrandProps {
+  className: string;
+  logoSrc: string;
+  onClick?: () => void;
+}
+
+function Brand({ className, logoSrc, onClick }: BrandProps): React.JSX.Element {
   const content = (
     <>
       <img className="logo" src={logoSrc} alt="" />
@@ -21,7 +28,7 @@ function Brand({ className, logoSrc, onClick }) {
   return <div className={className}>{content}</div>;
 }
 
-function Sidebar({ logoSrc }) {
+function Sidebar({ logoSrc }: { logoSrc: string }): React.JSX.Element {
   return (
     <aside>
       <Brand className="brand" logoSrc={logoSrc} />
@@ -36,7 +43,7 @@ function Sidebar({ logoSrc }) {
   );
 }
 
-function SearchBar() {
+function SearchBar(): React.JSX.Element {
   return (
     <div className="search">
       <input
@@ -47,7 +54,7 @@ function SearchBar() {
   );
 }
 
-function NotificationButton({ onClick }) {
+function NotificationButton({ onClick }: { onClick: () => void }): React.JSX.Element {
   return (
     <button
       className="bell"
@@ -62,7 +69,15 @@ function NotificationButton({ onClick }) {
   );
 }
 
-function Topbar({ logoSrc, onHomeClick, onNotifications }) {
+function Topbar({
+  logoSrc,
+  onHomeClick,
+  onNotifications,
+}: {
+  logoSrc: string;
+  onHomeClick: () => void;
+  onNotifications: () => void;
+}): React.JSX.Element {
   return (
     <header className="topbar">
       <Brand className="topbrand" logoSrc={logoSrc} onClick={onHomeClick} />
@@ -75,7 +90,17 @@ function Topbar({ logoSrc, onHomeClick, onNotifications }) {
   );
 }
 
-export default function AppShell({ children, logoSrc, onHomeClick, onNotifications }) {
+export default function AppShell({
+  children,
+  logoSrc,
+  onHomeClick,
+  onNotifications,
+}: {
+  children: ReactNode;
+  logoSrc: string;
+  onHomeClick: () => void;
+  onNotifications: () => void;
+}): React.JSX.Element {
   return (
     <>
       <div className="topline" />

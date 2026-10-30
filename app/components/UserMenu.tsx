@@ -2,18 +2,28 @@
 
 import { useEffect, useRef, useState } from "react";
 
-const defaultPreferences = {
+type Theme = "light" | "dark" | "system";
+type BooleanPreference = "notifications" | "compact" | "hint";
+
+interface Preferences {
+  notifications: boolean;
+  compact: boolean;
+  hint: boolean;
+  theme: Theme;
+}
+
+const defaultPreferences: Preferences = {
   notifications: true,
   compact: false,
   hint: true,
   theme: "light",
 };
 
-function translate(context, de, en) {
+function translate(context: DemoContext, de: string, en: string): string {
   return context.lang === "en" ? en : de;
 }
 
-function applyPreferences(preferences) {
+function applyPreferences(preferences: Preferences): void {
   const dark =
     preferences.theme === "dark" ||
     (preferences.theme === "system" &&
@@ -24,17 +34,17 @@ function applyPreferences(preferences) {
   document.body.classList.toggle("hide-bell", !preferences.notifications);
 }
 
-export default function UserMenu() {
-  const [context, setContext] = useState({
+export default function UserMenu(): React.JSX.Element {
+  const [context, setContext] = useState<DemoContext>({
     lang: "de",
     currentRole: "supporter",
     currentUser: "",
     teamLeader: "",
   });
-  const [preferences, setPreferences] = useState(null);
-  const [isOpen, setIsOpen] = useState(false);
-  const buttonRef = useRef(null);
-  const menuRef = useRef(null);
+  const [preferences, setPreferences] = useState<Preferences | null>(null);
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const updateContext = () => {
@@ -61,16 +71,15 @@ export default function UserMenu() {
   useEffect(() => {
     if (!isOpen) return;
 
-    function handleDocumentClick(event) {
-      if (
-        !buttonRef.current?.contains(event.target) &&
-        !menuRef.current?.contains(event.target)
-      ) {
+    function handleDocumentClick(event: MouseEvent): void {
+      const target = event.target;
+      if (!(target instanceof Node)) return;
+      if (!buttonRef.current?.contains(target) && !menuRef.current?.contains(target)) {
         setIsOpen(false);
       }
     }
 
-    function handleKeyDown(event) {
+    function handleKeyDown(event: KeyboardEvent): void {
       if (event.key === "Escape") setIsOpen(false);
     }
 
@@ -85,19 +94,23 @@ export default function UserMenu() {
   const name =
     context.currentRole === "leader" ? context.teamLeader : context.currentUser;
 
-  function setPreference(key, value) {
+  function setPreference<K extends keyof Preferences>(
+    key: K,
+    value: Preferences[K],
+  ): void {
+    if (!preferences) return;
     const next = { ...preferences, [key]: value };
     setPreferences(next);
     localStorage.setItem("it-demo-prefs", JSON.stringify(next));
     setIsOpen(false);
   }
 
-  function toggleLanguage(language) {
+  function toggleLanguage(language: DemoContext["lang"]): void {
     setIsOpen(false);
     if (context.lang !== language) window.toggleLanguage();
   }
 
-  function toggle(label, key) {
+  function toggle(label: string, key: BooleanPreference): React.JSX.Element {
     return (
       <label className="um-row um-toggle" key={key}>
         <span>{label}</span>
@@ -112,7 +125,7 @@ export default function UserMenu() {
     );
   }
 
-  function info(label, value) {
+  function info(label: string, value: string): React.JSX.Element {
     return (
       <div className="um-row" key={label}>
         <span>{label}</span>
@@ -121,7 +134,7 @@ export default function UserMenu() {
     );
   }
 
-  function mode(key, icon, label) {
+  function mode(key: Theme, icon: string, label: string): React.JSX.Element {
     return (
       <button
         className={`um-row um-mode ${preferences.theme === key ? "on" : ""}`}

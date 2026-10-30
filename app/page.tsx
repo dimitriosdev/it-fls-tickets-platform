@@ -5,22 +5,24 @@ import logoMark from "../assets/images/logo-dg-erp-mark-only.0e1f217bc91f66520a3
 import AppShell from "./components/AppShell";
 
 const appScripts = [
-  "/assets/js/data/reference-data.js",
-  "/assets/js/data/seed-data.js",
-  "/assets/js/leader.js",
-  "/assets/js/app.js",
+  "/generated/js/data/reference-data.js",
+  "/generated/js/data/seed-data.js",
+  "/generated/js/leader.js",
+  "/generated/js/app.js",
 ];
 
+let appScriptsPromise: Promise<void> | null = null;
+
 function loadAppScripts() {
-  if (!window.itSupportDemoScriptsPromise) {
-    window.itSupportDemoScriptsPromise = appScripts.reduce(
+  if (!appScriptsPromise) {
+    appScriptsPromise = appScripts.reduce<Promise<void>>(
       (promise, src) =>
         promise.then(
           () =>
-            new Promise((resolve, reject) => {
+            new Promise<void>((resolve, reject) => {
               const script = document.createElement("script");
               script.src = src;
-              script.onload = resolve;
+              script.onload = () => resolve();
               script.onerror = () =>
                 reject(new Error(`Failed to load application script: ${src}`));
               document.body.appendChild(script);
@@ -30,11 +32,11 @@ function loadAppScripts() {
     );
   }
 
-  return window.itSupportDemoScriptsPromise;
+  return appScriptsPromise;
 }
 
-export default function HomePage() {
-  const [loadError, setLoadError] = useState("");
+export default function HomePage(): React.JSX.Element {
+  const [loadError, setLoadError] = useState<string>("");
 
   useEffect(() => {
     let active = true;
@@ -43,7 +45,7 @@ export default function HomePage() {
       console.error(error);
       if (active) {
         setLoadError(
-          "The demo could not start. Check that the JavaScript assets are available and reload.",
+          "The demo could not start. Check that the compiled application assets are available and reload.",
         );
       }
     });

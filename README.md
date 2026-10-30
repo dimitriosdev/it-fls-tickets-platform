@@ -15,37 +15,40 @@ npm run dev
 Open [http://localhost:3000](http://localhost:3000). Create a production build
 with `npm run build` and serve it with `npm start`.
 
-Format the JavaScript files with `npm run format`; check formatting with
+The browser-only workflow scripts are compiled from TypeScript before `dev`,
+`build`, and `start`. Format TypeScript with `npm run format` and check it with
 `npm run format:check`.
 
 ## Project structure
 
 ```text
 app/
-  layout.js
-  page.js
+  layout.tsx
+  page.tsx
   components/
-    AppShell.js
-    UserMenu.js
+    AppShell.tsx
+    UserMenu.tsx
 assets/
   css/
     styles.css
-public/
-  assets/
-    js/
-      app.js
-      data/
-        reference-data.js
-        seed-data.js
+src/
+  client/
+    app.ts
+    leader.ts
+    data/
+      reference-data.ts
+      seed-data.ts
 ```
 
-- `app/page.js` provides the Next.js page shell and loads the browser-only demo.
-- `app/components/AppShell.js` contains the shared sidebar, top bar, and shell components.
-- `app/components/UserMenu.js` contains the user menu and its display preferences.
-- `app/layout.js` contains the document metadata and shared stylesheet import.
-- `public/assets/js/data/reference-data.js` contains shared demo lists.
-- `public/assets/js/data/seed-data.js` contains the initial incident records.
-- `public/assets/js/app.js` contains the existing incident workflows.
+- `app/page.tsx` provides the Next.js page shell and loads the browser-only demo.
+- `app/components/AppShell.tsx` contains the shared sidebar, top bar, and shell components.
+- `app/components/UserMenu.tsx` contains the user menu and its display preferences.
+- `app/layout.tsx` contains the document metadata and shared stylesheet import.
+- `src/client/data/reference-data.ts` contains shared demo lists.
+- `src/client/data/seed-data.ts` contains the initial incident records.
+- `src/client/app.ts` contains the existing incident workflows.
+- `src/client/leader.ts` contains the team-leader reporting workflows.
+- TypeScript browser scripts are compiled to ignored `public/generated/js/` assets before Next.js runs.
 - `assets/css/styles.css` contains the page styles.
 
 This is a demo without a backend, authentication, or access control. Changes

@@ -40,7 +40,10 @@ function effectiveAssignee() {
       ? currentUser
       : "";
 }
-const $ = (s) => document.querySelector(s);
+const $ = (s) =>
+  document.querySelector<
+    HTMLElement & { value: string; checked: boolean; required: boolean }
+  >(s);
 const escapeHtml = (s) =>
   String(s ?? "").replace(
     /[&<>"']/g,
@@ -154,7 +157,6 @@ const pageRenderers = {
 const translations = {
   Dashboard: "Dashboard",
   Ereignisse: "Incidents",
-  "Neues Ereignis": "New Incident",
   Berichte: "Reports",
   Einstellungen: "Settings",
   "Willkommen zurück. Hier ist die aktuelle Übersicht.":
@@ -203,7 +205,6 @@ const translations = {
   Übersicht: "Overview",
   Aktivitäten: "Activity",
   Aktionen: "Actions",
-  "Problem lösen": "Resolve issue",
   "Direkt durch Support erledigen": "Resolve directly by Support",
   "Delegieren / informieren": "Delegate / inform",
   "Person oder Team informieren": "Inform a person or team",
@@ -243,9 +244,7 @@ const translations = {
   "Top wiederkehrende Probleme nach Kategorie": "Top recurring issues by category",
   Abschlussübersicht: "Closure overview",
   "Aktuell delegiert": "Currently delegated",
-  Geschlossen: "Closed",
   "Offen / in Bearbeitung": "Open / in progress",
-  Abschlussübersicht: "Closure overview",
   "Berichte werden aus den lokalen Beispieldaten berechnet. Der Zeitraum ist für die Demo illustrativ und keine revisionssichere Auswertung.":
     "Reports are calculated from local sample data. The period is illustrative and not an audit-ready report.",
   "Kategorien verwalten": "Manage categories",
@@ -254,7 +253,6 @@ const translations = {
   "Demo verwalten": "Manage demo",
   "Alle Änderungen werden nur in diesem Browser gespeichert.":
     "All changes are stored only in this browser.",
-  Ereignisse: "Incidents",
   Speicherung: "Storage",
   Backend: "Backend",
   "Nicht verbunden": "Not connected",
@@ -275,7 +273,6 @@ const translations = {
   Lösung: "Resolution",
   Delegationsnotiz: "Delegation note",
   "Informiert: ": "Informed: ",
-  "Ereignis geschlossen": "Incident closed",
   "Ereignis als gelöst markiert": "Incident marked resolved",
   "Delegation dokumentiert": "Delegation recorded",
   "Zuweisung gespeichert": "Assignment saved",
@@ -660,7 +657,7 @@ function detailPage() {
   const actionBar = buttons
     ? `<div class="actionbar">${buttons}<span class="actionhint">${hint}</span></div>`
     : "";
-  const fact = (label, value, wide) =>
+  const fact = (label, value, wide = false) =>
     `<div class="fact${wide ? " wide" : ""}"><span>${label}</span><strong>${value}</strong></div>`;
   const facts = [
     fact(en ? "Workplace" : "Arbeitsplatz", escapeHtml(i.workplace)),
@@ -795,13 +792,16 @@ function applyResolutionExample() {
   }
   const description = $("#resolutionDescription");
   if (description) description.value = example;
-  const action = document.querySelector('input[name="outcome"][value="action_taken"]');
+  const action = document.querySelector<HTMLInputElement>(
+    'input[name="outcome"][value="action_taken"]',
+  );
   if (action) action.checked = true;
   toggleResolutionFields();
 }
 function toggleResolutionFields() {
   const outcome =
-    document.querySelector('input[name="outcome"]:checked')?.value || "action_taken";
+    document.querySelector<HTMLInputElement>('input[name="outcome"]:checked')?.value ||
+    "action_taken";
   const actionField = $("#resolutionDescriptionField"),
     desc = $("#resolutionDescription");
   const informed = outcome === "external";
@@ -1013,7 +1013,9 @@ $("#globalSearch").addEventListener("keydown", (e) => {
     setTimeout(() => {
       let x = $("#fsearch");
       if (x) {
-        x.value = e.target.value;
+        const target = e.currentTarget;
+        if (!(target instanceof HTMLInputElement)) return;
+        x.value = target.value;
         filterTable();
       }
     }, 0);
