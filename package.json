@@ -5,11 +5,16 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "format": "prettier --write \"app/**/*.js\" \"public/assets/js/**/*.js\"",
+    "format:check": "prettier --check \"app/**/*.js\" \"public/assets/js/**/*.js\""
   },
   "dependencies": {
     "next": "^15.2.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "prettier": "^3.5.3"
   }
 }

@@ -15,12 +15,18 @@ npm run dev
 Open [http://localhost:3000](http://localhost:3000). Create a production build
 with `npm run build` and serve it with `npm start`.
 
+Format the JavaScript files with `npm run format`; check formatting with
+`npm run format:check`.
+
 ## Project structure
 
 ```text
 app/
   layout.js
   page.js
+  components/
+    AppShell.js
+    UserMenu.js
 assets/
   css/
     styles.css
@@ -34,6 +40,8 @@ public/
 ```
 
 - `app/page.js` provides the Next.js page shell and loads the browser-only demo.
+- `app/components/AppShell.js` contains the shared sidebar, top bar, and shell components.
+- `app/components/UserMenu.js` contains the user menu and its display preferences.
 - `app/layout.js` contains the document metadata and shared stylesheet import.
 - `public/assets/js/data/reference-data.js` contains shared demo lists.
 - `public/assets/js/data/seed-data.js` contains the initial incident records.
