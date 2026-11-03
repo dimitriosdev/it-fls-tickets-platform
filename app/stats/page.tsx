@@ -324,7 +324,7 @@ function Filters({
   onSelected: (s: Set<string>) => void;
 }) {
   const t = useT();
-  const options = [...payload.supporters, OTHER];
+  const options = payload.supporters;
   const toggle = (k: string) => {
     const next = new Set(selected);
     if (next.has(k)) next.delete(k);
@@ -386,7 +386,7 @@ function Filters({
           onClick={() => {
             onFrom(bounds.min);
             onTo(bounds.max);
-            onSelected(new Set(options));
+            onSelected(new Set([...options, OTHER]));
           }}
           style={{ ...input, background: "#f4f6f7", cursor: "pointer" }}
         >
@@ -419,7 +419,7 @@ function Filters({
                 cursor: "pointer",
               }}
             >
-              {o === OTHER ? t.other : o}
+              {o}
             </button>
           );
         })}
@@ -468,7 +468,7 @@ function Dashboard({ s }: { s: Stats }) {
           <Donut data={s.deviceCategories} />
         </Card>
         <Card title={t.topDevices}>
-          <HBar data={s.deviceNames} color={PALETTE[0]} />
+          <HBar data={tr(s.deviceNames)} color={PALETTE[0]} />
         </Card>
       </Section>
 

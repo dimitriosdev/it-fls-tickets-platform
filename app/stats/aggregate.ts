@@ -95,7 +95,12 @@ export function compute(tickets: Ticket[]): Stats {
     inc(perDay, t.date);
     if (t.wd >= 0) heat[t.wd][t.hr]++;
     for (const c of t.cats) inc(devCat, c);
-    t.names.forEach((n) => inc(devName, n));
+    t.names.forEach((n) =>
+      inc(
+        devName,
+        n === "Big Label Drucker" || n === "Small Label Drucker" ? "printer" : n,
+      ),
+    );
     inc(dept, t.dept);
     inc(line, t.line);
     inc(role, t.role);

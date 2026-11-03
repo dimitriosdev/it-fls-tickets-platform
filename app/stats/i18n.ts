@@ -12,7 +12,6 @@ type Dict = {
   to: string;
   reset: string;
   resolvedBy: string;
-  other: string;
   totalTickets: string;
   totalSupportTime: string;
   ticketsPerDay: string;
@@ -58,7 +57,6 @@ export const DICT: Record<Lang, Dict> = {
     to: "Bis",
     reset: "Zurücksetzen",
     resolvedBy: "Gelöst von:",
-    other: "Andere",
     totalTickets: "Tickets gesamt",
     totalSupportTime: "Supportzeit gesamt",
     ticketsPerDay: "Tickets / Tag",
@@ -119,7 +117,6 @@ export const DICT: Record<Lang, Dict> = {
     to: "To",
     reset: "Reset",
     resolvedBy: "Resolved by:",
-    other: "Other",
     totalTickets: "Total tickets",
     totalSupportTime: "Total support time",
     ticketsPerDay: "Tickets / day",
