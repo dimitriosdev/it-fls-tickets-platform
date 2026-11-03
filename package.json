@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "build:client": "tsc -p tsconfig.client.json",
+    "build:stats": "node scripts/build-stats.mjs",
     "predev": "npm run build:client",
     "dev": "next dev",
     "prebuild": "npm run build:client",

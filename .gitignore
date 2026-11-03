@@ -4,6 +4,7 @@ out/
 build/
 public/generated/
 *.tsbuildinfo
+data/reported_issues_*.json
 .env*
 !.env.example
 npm-debug.log*
