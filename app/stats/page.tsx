@@ -1,9 +1,14 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import type { FormEvent, ReactNode } from "react";
 import { compute } from "./aggregate";
 import type { Item, Payload, Stats } from "./aggregate";
+import { DICT } from "./i18n";
+import type { Lang } from "./i18n";
+
+const LangContext = createContext<Lang>("de");
+const useT = () => DICT[useContext(LangContext)];
 
 const OTHER = "__other__";
 
@@ -318,6 +323,7 @@ function Filters({
   onTo: (v: string) => void;
   onSelected: (s: Set<string>) => void;
 }) {
+  const t = useT();
   const options = [...payload.supporters, OTHER];
   const toggle = (k: string) => {
     const next = new Set(selected);
@@ -354,7 +360,7 @@ function Filters({
         }}
       >
         <label>
-          From{" "}
+          {t.from}{" "}
           <input
             type="date"
             style={input}
@@ -365,7 +371,7 @@ function Filters({
           />
         </label>
         <label>
-          To{" "}
+          {t.to}{" "}
           <input
             type="date"
             style={input}
@@ -384,7 +390,7 @@ function Filters({
           }}
           style={{ ...input, background: "#f4f6f7", cursor: "pointer" }}
         >
-          Reset
+          {t.reset}
         </button>
       </div>
       <div
@@ -396,7 +402,7 @@ function Filters({
           fontSize: 13,
         }}
       >
-        <span style={{ color: MUTED }}>Resolved by:</span>
+        <span style={{ color: MUTED }}>{t.resolvedBy}</span>
         {options.map((o) => {
           const on = selected.has(o);
           return (
@@ -413,7 +419,7 @@ function Filters({
                 cursor: "pointer",
               }}
             >
-              {o === OTHER ? "Other" : o}
+              {o === OTHER ? t.other : o}
             </button>
           );
         })}
@@ -423,7 +429,10 @@ function Filters({
 }
 
 function Dashboard({ s }: { s: Stats }) {
+  const t = useT();
   const k = s.kpis;
+  const tr = (items: Item[]) =>
+    items.map((i) => ({ ...i, label: t.labels[i.label] ?? i.label }));
   return (
     <>
       <p style={{ color: MUTED, marginTop: 0 }}>
@@ -437,81 +446,119 @@ function Dashboard({ s }: { s: Stats }) {
           marginBottom: 32,
         }}
       >
-        <Kpi label="Total tickets" value={fmt(k.total)} />
-        <Kpi label="Total support time" value={`${fmt(k.totalHours)} h`} />
-        <Kpi label="Tickets / day" value={String(k.avgPerDay)} />
+        <Kpi label={t.totalTickets} value={fmt(k.total)} />
+        <Kpi label={t.totalSupportTime} value={`${fmt(k.totalHours)} ${t.hoursUnit}`} />
+        <Kpi label={t.ticketsPerDay} value={String(k.avgPerDay)} />
       </div>
 
-      <Section title="Time trends">
-        <Card title="Tickets per month">
+      <Section title={t.secTimeTrends}>
+        <Card title={t.ticketsPerMonth}>
           <Columns data={s.perMonth.map((d) => ({ ...d, label: d.label.slice(5) }))} />
         </Card>
-        <Card title="Cumulative tickets">
+        <Card title={t.cumulative}>
           <LineChart data={s.cumulative} />
         </Card>
-        <Card title="Weekday × hour (Europe/Zurich)" wide>
-          <Heatmap days={s.heatmap.days} data={s.heatmap.data} />
+        <Card title={t.heatmap} wide>
+          <Heatmap days={t.days} data={s.heatmap.data} />
         </Card>
       </Section>
 
-      <Section title="Devices">
-        <Card title="Tickets by device category">
+      <Section title={t.secDevices}>
+        <Card title={t.deviceCategory}>
           <Donut data={s.deviceCategories} />
         </Card>
-        <Card title="Top devices">
+        <Card title={t.topDevices}>
           <HBar data={s.deviceNames} color={PALETTE[0]} />
         </Card>
       </Section>
 
-      <Section title="Location">
-        <Card title="Production line">
+      <Section title={t.secLocation}>
+        <Card title={t.productionLine}>
           <HBar data={s.lines} color={PALETTE[2]} />
         </Card>
-        <Card title="Department">
+        <Card title={t.department}>
           <Donut data={s.departments} />
         </Card>
-        <Card title="Role">
+        <Card title={t.role}>
           <HBar data={s.roles} color={PALETTE[4]} />
         </Card>
       </Section>
 
-      <Section title="People">
-        <Card title="Top reporters">
+      <Section title={t.secPeople}>
+        <Card title={t.topReporters}>
           <HBar data={s.reporters} />
         </Card>
-        <Card title="Tickets resolved by supporter">
+        <Card title={t.resolvedBySupporter}>
           <HBar data={s.resolvers} color={PALETTE[2]} />
         </Card>
-        <Card title="Avg resolution time per supporter (min, ≥20 tickets)">
-          <HBar data={s.resolverAvgMinutes} color={PALETTE[4]} unit=" m" />
+        <Card title={t.avgPerSupporter}>
+          <HBar data={s.resolverAvgMinutes} color={PALETTE[4]} unit={` ${t.minUnit}`} />
         </Card>
       </Section>
 
-      <Section title="Resolution time">
-        <Card title="Distribution (minutes per ticket)">
+      <Section title={t.secResolution}>
+        <Card title={t.distribution}>
           <Columns data={s.histogram} color={PALETTE[3]} />
         </Card>
-        <Card title="Median minutes by device category">
-          <HBar data={s.medianByCategory} color={PALETTE[6]} unit=" m" />
+        <Card title={t.medianByCategory}>
+          <HBar data={tr(s.medianByCategory)} color={PALETTE[6]} unit={` ${t.minUnit}`} />
         </Card>
-        <Card title="Documented vs estimated time">
-          <Donut data={s.timeSource} />
+        <Card title={t.docVsEst}>
+          <Donut data={tr(s.timeSource)} />
         </Card>
       </Section>
 
-      <Section title="Data quality">
-        <Card title="Location identification">
-          <Donut data={s.locationStatus} />
+      <Section title={t.secQuality}>
+        <Card title={t.locIdent}>
+          <Donut data={tr(s.locationStatus)} />
         </Card>
-        <Card title="Support record match">
-          <Donut data={s.matchStatus} />
+        <Card title={t.supportMatch}>
+          <Donut data={tr(s.matchStatus)} />
         </Card>
       </Section>
     </>
   );
 }
 
+function LangToggle({ lang, onChange }: { lang: Lang; onChange: (l: Lang) => void }) {
+  return (
+    <div style={{ display: "inline-flex", gap: 4 }}>
+      {(["de", "en"] as const).map((l) => (
+        <button
+          key={l}
+          type="button"
+          onClick={() => onChange(l)}
+          aria-pressed={lang === l}
+          style={{
+            padding: "4px 10px",
+            borderRadius: 6,
+            border: `1px solid ${lang === l ? "#ff603f" : LINE}`,
+            background: lang === l ? "#ff603f" : "#fff",
+            color: lang === l ? "#fff" : INK,
+            cursor: "pointer",
+            fontSize: 12,
+            fontWeight: 600,
+          }}
+        >
+          {l.toUpperCase()}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export default function StatsPage(): React.JSX.Element {
+  const [lang, setLang] = useState<Lang>("de");
+  useEffect(() => {
+    const saved = window.localStorage.getItem("stats-lang");
+    if (saved === "de" || saved === "en") setLang(saved);
+  }, []);
+  const changeLang = (l: Lang) => {
+    setLang(l);
+    window.localStorage.setItem("stats-lang", l);
+  };
+  const t = DICT[lang];
+
   const [pin, setPin] = useState("");
   const [payload, setPayload] = useState<Payload | null>(null);
   const [error, setError] = useState("");
@@ -547,10 +594,7 @@ export default function StatsPage(): React.JSX.Element {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ pin }),
       });
-      if (!res.ok)
-        throw new Error(
-          res.status === 401 ? "Incorrect PIN." : "Could not load statistics.",
-        );
+      if (!res.ok) throw new Error(res.status === 401 ? "wrongPin" : "loadError");
       const data: Payload = await res.json();
       const dates = data.tickets.map((t) => t.date).sort();
       setFrom(dates[0] ?? "");
@@ -558,7 +602,9 @@ export default function StatsPage(): React.JSX.Element {
       setSelected(new Set([...data.supporters, OTHER]));
       setPayload(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not load statistics.");
+      setError(
+        err instanceof Error && err.message === "wrongPin" ? "wrongPin" : "loadError",
+      );
     } finally {
       setLoading(false);
     }
@@ -586,9 +632,18 @@ export default function StatsPage(): React.JSX.Element {
             width: 300,
           }}
         >
-          <h1 style={{ margin: 0, fontSize: 20, color: INK }}>Statistics</h1>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <h1 style={{ margin: 0, fontSize: 20, color: INK }}>{t.statistics}</h1>
+            <LangToggle lang={lang} onChange={changeLang} />
+          </div>
           <label style={{ fontSize: 13, color: MUTED }} htmlFor="pin">
-            Enter PIN to continue
+            {t.enterPin}
           </label>
           <input
             id="pin"
@@ -604,7 +659,11 @@ export default function StatsPage(): React.JSX.Element {
               fontSize: 16,
             }}
           />
-          {error && <div style={{ color: "#d92d20", fontSize: 13 }}>{error}</div>}
+          {error && (
+            <div style={{ color: "#d92d20", fontSize: 13 }}>
+              {error === "wrongPin" ? t.wrongPin : t.loadError}
+            </div>
+          )}
           <button
             type="submit"
             disabled={loading || !pin}
@@ -618,7 +677,7 @@ export default function StatsPage(): React.JSX.Element {
               cursor: "pointer",
             }}
           >
-            {loading ? "Checking…" : "Unlock"}
+            {loading ? t.checking : t.unlock}
           </button>
         </form>
       </main>
@@ -627,20 +686,32 @@ export default function StatsPage(): React.JSX.Element {
 
   return (
     <main style={{ background: "#f4f6f7", minHeight: "100vh", padding: "24px 20px" }}>
-      <div style={{ maxWidth: 1200, margin: "0 auto" }}>
-        <h1 style={{ color: INK, marginBottom: 4 }}>IT Support Statistics</h1>
-        <Filters
-          payload={payload}
-          bounds={bounds}
-          from={from}
-          to={to}
-          selected={selected}
-          onFrom={setFrom}
-          onTo={setTo}
-          onSelected={setSelected}
-        />
-        <Dashboard s={stats} />
-      </div>
+      <LangContext.Provider value={lang}>
+        <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: 4,
+            }}
+          >
+            <h1 style={{ color: INK, margin: 0 }}>{t.title}</h1>
+            <LangToggle lang={lang} onChange={changeLang} />
+          </div>
+          <Filters
+            payload={payload}
+            bounds={bounds}
+            from={from}
+            to={to}
+            selected={selected}
+            onFrom={setFrom}
+            onTo={setTo}
+            onSelected={setSelected}
+          />
+          <Dashboard s={stats} />
+        </div>
+      </LangContext.Provider>
     </main>
   );
 }
