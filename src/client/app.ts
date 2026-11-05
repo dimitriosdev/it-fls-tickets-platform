@@ -133,7 +133,7 @@ function renderNav() {
   $("#nav").innerHTML = items
     .map(
       ([p, i, t]) =>
-        `<button class="${page === p || ((page === "detail" || page === "resolve" || page === "delegate" || page === "close") && p === "incidents") ? "active" : ""}" onclick="setPage('${p}')"><span class="ico">${i}</span><span>${t}</span></button>`,
+        `<button type="button" class="menu-child ${page === p || (["incidents", "detail", "resolve", "delegate", "close", "settings"].includes(page) && p === "dashboard") ? "active" : ""}" aria-current="${page === p ? "page" : "false"}" onclick="setPage('${p}')">${t}</button>`,
     )
     .join("");
   const favoriteIncidents = $("#favoriteIncidents"),
@@ -167,7 +167,7 @@ const translations = {
   "Konfiguration für die Demo": "Demo configuration",
   "Direkt durch Support gelöst": "Resolved directly by Support",
   "Delegierte Ereignisse": "Delegated incidents",
-  "Offene Ereignisse": "Open incidents",
+  "Offene Ereignisse": "Open tickets",
   "Ø Support-Lösungszeit": "Avg. Support resolution time",
   "gegenüber Vorwoche": "vs. previous week",
   "Zur Information weitergegeben": "Passed on for information",
@@ -319,8 +319,24 @@ function render() {
   const view = $("#view");
   view.innerHTML = (pageRenderers[page] || dashboard)();
   translateDOM(view);
+  moveHeadToTopbar(view);
   if (page === "reports") updateReports();
   window.dispatchEvent(new Event("it-support-demo:context-change"));
+}
+function moveHeadToTopbar(view) {
+  const title = $("#topbarTitle"),
+    sub = $("#topbarSub");
+  const heading = view.querySelector(".pagehead > div > h1");
+  if (title) title.innerHTML = heading ? heading.innerHTML : "";
+  if (sub) {
+    const subtitle = heading && heading.parentElement.querySelector(".sub");
+    sub.innerHTML = subtitle ? subtitle.innerHTML : "";
+  }
+  if (!heading) return;
+  const pagehead = heading.closest(".pagehead");
+  heading.parentElement.remove();
+  if (pagehead.children.length) pagehead.classList.add("no-title");
+  else pagehead.remove();
 }
 function updateTopbar() {
   const rp = $("#rolePicker");
@@ -418,7 +434,7 @@ function dashboard() {
           : "Offene Arbeit und direkte Lösungen durch Support.",
         "",
       ) +
-      `<div class="actionbar"><button class="btn primary" onclick="incidentListMode='open';setPage('incidents')">▤ ${lang === "en" ? "Open incident list" : "Ereignisliste öffnen"} (${open.length})</button><span class="actionhint">${lang === "en" ? "See all open incidents and pick one up." : "Alle offenen Ereignisse ansehen und eines übernehmen."}</span></div><div class="cards">${metric(lang === "en" ? "Resolved today" : "Heute gelöst", todayCount, lang === "en" ? "Directly by Support" : "Direkt durch Support", "✓")}${metric(lang === "en" ? "Resolved this week" : "Diese Woche gelöst", weekCount, lang === "en" ? "Directly by Support" : "Direkt durch Support", "✓")}</div><div class="card" style="margin-top:16px"><h2>${lang === "en" ? "New incidents" : "Neue Ereignisse"}</h2>${tableRows(incidents.filter((i) => i.status === "New"))}</div>`
+      `<div class="actionbar"><button class="btn primary" onclick="incidentListMode='open';setPage('incidents')">▤ ${lang === "en" ? "Tickets list" : "Ereignisliste öffnen"} (${open.length})</button><span class="actionhint">${lang === "en" ? "See all open tickets and pick one up." : "Alle offenen Ereignisse ansehen und eines übernehmen."}</span></div><div class="cards">${metric(lang === "en" ? "Resolved today" : "Heute gelöst", todayCount, lang === "en" ? "Directly by Support" : "Direkt durch Support", "✓")}${metric(lang === "en" ? "Resolved this week" : "Diese Woche gelöst", weekCount, lang === "en" ? "Directly by Support" : "Direkt durch Support", "✓")}</div><div class="card" style="margin-top:16px"><h2>${lang === "en" ? "New incidents" : "Neue Ereignisse"}</h2>${tableRows(incidents.filter((i) => i.status === "New"))}</div>`
     );
   }
   return leadDashboard();
@@ -474,7 +490,7 @@ function incidentList() {
       ? `<div class="actionbar"><button class="btn primary" onclick="setPage('new')">＋ ${lang === "en" ? "New incident" : "Neues Ereignis"}</button><span class="actionhint">${lang === "en" ? "Something not working? Report a new problem." : "Etwas funktioniert nicht? Melde ein neues Problem."}</span></div>`
       : "";
   const tabs = [
-    ["all", lang === "en" ? "All incidents" : "Alle Ereignisse"],
+    ["all", lang === "en" ? "All tickets" : "Alle Ereignisse"],
     ["open", lang === "en" ? "Open" : "Offen"],
     ["new", lang === "en" ? "New" : "Neu"],
     ["resolved", lang === "en" ? "Resolved" : "Gelöst"],
@@ -484,7 +500,7 @@ function incidentList() {
     head(
       "Ereignisse",
       lang === "en"
-        ? "All reported and handled incidents."
+        ? "All reported and handled tickets."
         : "Alle gemeldeten und bearbeiteten Ereignisse.",
     ) +
     createBar +
@@ -1007,20 +1023,6 @@ function resetDemo() {
     render();
   }
 }
-$("#globalSearch").addEventListener("keydown", (e) => {
-  if (e.key === "Enter") {
-    setPage("incidents");
-    setTimeout(() => {
-      let x = $("#fsearch");
-      if (x) {
-        const target = e.currentTarget;
-        if (!(target instanceof HTMLInputElement)) return;
-        x.value = target.value;
-        filterTable();
-      }
-    }, 0);
-  }
-});
 render();
 function donutChart(rows) {
   const total = rows.reduce((s, r) => s + r[1], 0);

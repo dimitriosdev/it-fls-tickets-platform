@@ -1,9 +1,7 @@
 ﻿const NAV = [
-  ["dashboard", "⌂", "Dashboard"],
-  ["incidents", "▤", "Ereignisse"],
-  ["new", "＋", "Neues Ereignis"],
-  ["reports", "▥", "Berichte"],
-  ["settings", "⚙", "Einstellungen"],
+  ["dashboard", "⌂", "Overview"],
+  ["new", "＋", "New incident"],
+  ["reports", "▥", "Reports"],
 ];
 const workplaces = [
   "WE_MIDI_BUCHER_09",

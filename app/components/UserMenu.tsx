@@ -3,19 +3,12 @@
 import { useEffect, useRef, useState } from "react";
 
 type Theme = "light" | "dark" | "system";
-type BooleanPreference = "notifications" | "compact" | "hint";
 
 interface Preferences {
-  notifications: boolean;
-  compact: boolean;
-  hint: boolean;
   theme: Theme;
 }
 
 const defaultPreferences: Preferences = {
-  notifications: true,
-  compact: false,
-  hint: true,
   theme: "light",
 };
 
@@ -29,9 +22,8 @@ function applyPreferences(preferences: Preferences): void {
     (preferences.theme === "system" &&
       window.matchMedia("(prefers-color-scheme: dark)").matches);
   document.documentElement.classList.toggle("theme-dark", dark);
-  document.body.classList.toggle("compact", preferences.compact);
-  document.body.classList.toggle("hide-hint", !preferences.hint);
-  document.body.classList.toggle("hide-bell", !preferences.notifications);
+  document.body.classList.add("compact");
+  document.body.classList.remove("hide-hint", "hide-bell");
 }
 
 export default function UserMenu(): React.JSX.Element {
@@ -110,21 +102,6 @@ export default function UserMenu(): React.JSX.Element {
     if (context.lang !== language) window.toggleLanguage();
   }
 
-  function toggle(label: string, key: BooleanPreference): React.JSX.Element {
-    return (
-      <label className="um-row um-toggle" key={key}>
-        <span>{label}</span>
-        <input
-          type="checkbox"
-          role="switch"
-          checked={preferences[key]}
-          onChange={(event) => setPreference(key, event.target.checked)}
-        />
-        <i className="switch" />
-      </label>
-    );
-  }
-
   function info(label: string, value: string): React.JSX.Element {
     return (
       <div className="um-row" key={label}>
@@ -187,19 +164,7 @@ export default function UserMenu(): React.JSX.Element {
                   <option value="leader">Team leader</option>
                 </select>
               </label>
-              {info(translate(context, "Mandant", "Client"), "Migros Demo AG")}
               {info(translate(context, "Standort", "Location"), "Hauptlager Wohlen")}
-            </div>
-            <div className="um-group">
-              {toggle(
-                translate(context, "Benachrichtigungen anzeigen", "Show notifications"),
-                "notifications",
-              )}
-              {toggle(translate(context, "Kompakte Ansicht", "Compact view"), "compact")}
-              {toggle(
-                translate(context, "Demo-Hinweis anzeigen", "Show demo notice"),
-                "hint",
-              )}
             </div>
             <div className="um-group">
               <div className="um-label">{translate(context, "Sprache", "Language")}</div>

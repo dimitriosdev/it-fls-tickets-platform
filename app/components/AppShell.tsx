@@ -1,7 +1,10 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import UserMenu from "./UserMenu";
+
+type MenuKey = "tickets" | "inventory";
 
 interface BrandProps {
   className: string;
@@ -29,11 +32,73 @@ function Brand({ className, logoSrc, onClick }: BrandProps): React.JSX.Element {
 }
 
 function Sidebar({ logoSrc }: { logoSrc: string }): React.JSX.Element {
+  const [openMenu, setOpenMenu] = useState<MenuKey | null>("tickets");
+
+  useEffect(() => {
+    if (window.matchMedia("(max-width: 620px)").matches) setOpenMenu(null);
+  }, []);
+
+  useEffect(() => {
+    function handleClick(event: MouseEvent): void {
+      const target = event.target;
+      if (
+        window.matchMedia("(max-width: 620px)").matches &&
+        target instanceof Element &&
+        !target.closest("aside")
+      ) {
+        setOpenMenu(null);
+      }
+    }
+    document.addEventListener("click", handleClick);
+    return () => document.removeEventListener("click", handleClick);
+  }, []);
+
+  function toggle(key: MenuKey): void {
+    setOpenMenu((current) => (current === key ? null : key));
+  }
+
+  function group(key: MenuKey, label: string, children: ReactNode): React.JSX.Element {
+    const open = openMenu === key;
+    return (
+      <div className="menu-group" data-open={open}>
+        <button
+          className="primary-nav-item"
+          type="button"
+          aria-expanded={open}
+          onClick={() => toggle(key)}
+        >
+          <span>{label}</span>
+          <span className="menu-chevron" aria-hidden="true">
+            ›
+          </span>
+        </button>
+        {children}
+      </div>
+    );
+  }
+
   return (
     <aside>
       <Brand className="brand" logoSrc={logoSrc} />
-      <div className="nav-section-label">Arbeitsbereich</div>
-      <nav className="nav" id="nav" aria-label="Workspace navigation" />
+      <nav className="primary-nav" aria-label="Workspace navigation">
+        {group(
+          "tickets",
+          "Tickets",
+          <div className="menu-children" id="nav" aria-label="Tickets navigation" />,
+        )}
+        {group(
+          "inventory",
+          "Inventory",
+          <div className="menu-children">
+            <button className="menu-child" type="button" disabled>
+              Overview
+            </button>
+            <button className="menu-child" type="button" disabled>
+              Order Requests
+            </button>
+          </div>,
+        )}
+      </nav>
       <div className="aside-foot">
         Incident Demo · v1.0
         <br />
@@ -43,13 +108,11 @@ function Sidebar({ logoSrc }: { logoSrc: string }): React.JSX.Element {
   );
 }
 
-function SearchBar(): React.JSX.Element {
+function PageTitle(): React.JSX.Element {
   return (
-    <div className="search">
-      <input
-        id="globalSearch"
-        placeholder="Suche nach Ereignissen, Arbeitsplatz, Kategorie …"
-      />
+    <div className="topbar-title">
+      <h1 id="topbarTitle" />
+      <div className="sub" id="topbarSub" />
     </div>
   );
 }
@@ -81,7 +144,7 @@ function Topbar({
   return (
     <header className="topbar">
       <Brand className="topbrand" logoSrc={logoSrc} onClick={onHomeClick} />
-      <SearchBar />
+      <PageTitle />
       <div className="topright">
         <NotificationButton onClick={onNotifications} />
         <UserMenu />
